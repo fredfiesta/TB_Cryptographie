@@ -1,6 +1,8 @@
 import base64
 import random
-
+from subprocess import check_output
+import ipywidgets as widgets
+from IPython.display import display, HTML, Code
 
 # Fonctions pour tous
 # Tire une phrase d'un fichier txt formaté
@@ -11,6 +13,32 @@ def shuffle_phrase(file_path):
     txt= split_lorem[0].upper()
     return txt
 
+# Fonctions pour le Hachage
+# MD5 Hash d'un fichier en entrée(path) et retourne l'empreinte
+def func_hash_md5(path):
+    empreinte_md5 = check_output(
+        f'openssl dgst -md5 -hex "{path}"',
+        shell=True
+    ).strip().decode("utf-8")
+    return empreinte_md5
+
+# Fonctions pour le Chiffrement par bloc
+# Chiffre le texte en AES en mode ECB
+def func_enc_ecb(texte):
+    resultat_chiffre = check_output(
+        f'echo -n "{texte}" | openssl enc -aes-256-ecb -a -pbkdf2 -k -pass -nosalt -nopad',
+        shell=True
+    ).strip().decode("utf-8")
+
+    return resultat_chiffre
+# Chiffre le texte en AES en mode CBC
+def func_enc_cbc(texte):
+    resultat_chiffre = check_output(
+        f'echo -n "{texte}" | openssl enc -aes-256-cbc -a -pbkdf2 -k -pass -nosalt -nopad',
+        shell=True
+    ).strip().decode("utf-8")
+
+    return resultat_chiffre
 # Fonctions Base64
 # Encode le mot en base64
 def func_enc_base64(texte):
@@ -102,3 +130,54 @@ def func_dec_vig(cipher_text, key):
 
 # Parts of this code is contributed by Pratik Somwanshi on www.geeksforgeeks.org
 # Consulté le 16.09.2023
+
+
+# Procédures d'affichage boutons pour exercices
+## TB_Hachage
+### Exercice 1 : Questionnaire
+def pro_display_md5():
+    # Création des ToggleButtons
+    toggle_buttons = widgets.ToggleButtons(
+        options=['Alice.txt', 'Bob.txt', 'Marc.txt'],
+        description='Fichiers:',
+        disabled=False,
+        button_style='info', # 'success', 'info', 'warning', 'danger' or ''
+        tooltips=['Le fichier d\'Alice a été modifié', 'Le fichier de Bob a été modifié', 'Le fichier de Marc a été modifié'],
+        icons=[],
+        value=None
+    )
+
+    # Fonction pour imprimer du texte en fonction de l'option sélectionnée
+    def on_toggle_change(change):
+        if change['type'] == 'change' and change['name'] == 'value':
+            toggle_buttons.icons=['times','times', 'check']
+            if change['new'] == 'Marc.txt':
+                print("Bonne Réponse!")
+            else:
+                print("Mauvaise réponse :(")
+            print("\nLe fichier de Marc n'a plus la même empreinte qu'à l'envoi. Il y a donc eu une modification du fichier.\nAvant: 9b6b49d07298b71f3b99c2892494a8f4 \nAprès: 9463839dddc18d0938de08d0e09432c8")
+    
+    print("Lequel de ces fichiers à été modifié?")
+    # Liaison de la fonction avec l'événement "observe" des ToggleButtons
+    toggle_buttons.observe(on_toggle_change)
+
+    # Affichage des ToggleButtons
+    display(toggle_buttons)
+
+## TB_base64
+### Exercice 1 : Bouton solution
+def pro_display_base64():
+    # Création du bouton
+    button = widgets.Button(description="Afficher la solution",button_style='info')
+
+    # Fonction appelée lors du clic sur le bouton
+    def on_button_clicked(b):
+        with open('../Soluce/soluce_base64_1.py', 'r') as file:
+            code = file.read()
+            display(Code(code, language='python'))
+
+    # Liaison de la fonction avec l'événement "on_click" du bouton
+    button.on_click(on_button_clicked)
+
+    # Affichage du bouton
+    display(button)

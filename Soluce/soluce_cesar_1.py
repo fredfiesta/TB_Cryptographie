@@ -1,4 +1,4 @@
-# Exercice 1
+# Solution - Exercice 1
 ## Choisir une phrase au hasard (ou non)
 texte = ef.shuffle_phrase(file_path)
 print(texte)
