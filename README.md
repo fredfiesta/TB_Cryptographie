@@ -67,7 +67,7 @@ Les étapes suivantes vont vous aider à cela.
 ### Guide Installation et lancement
 #### Etape 1 : Cloner le repository ou télécharger le .zip
 La première étape consiste à télécharger le code. Pour cela 2 options s'offre à vous.
-Si vous êtes familiés avec Github vous pouvez cloner le repository avec le lien suivant:
+Si vous êtes familier avec Github vous pouvez cloner le repository avec le lien suivant:
 
 > https://github.com/fredfiesta/TB_Cryptographie.git
 
