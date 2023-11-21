@@ -60,7 +60,11 @@ Si le serveur local Sage Math Notebook se lance, vous pourrez effectuer le exerc
 
 
 
-## Téléchargement et lancemment des exercices
+
+
+
+
+## Téléchargement et lancement des exercices
 Afin de pouvoir lancer les exercices, vous devez tout d'abord les installer.
 Les étapes suivantes vont vous aider à cela.
 
