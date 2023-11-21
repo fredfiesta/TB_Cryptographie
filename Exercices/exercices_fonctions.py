@@ -1,6 +1,6 @@
 import base64
 import random
-from subprocess import check_output
+from subprocess import check_output, run
 import ipywidgets as widgets
 from IPython.display import display, HTML, Code
 
@@ -12,6 +12,42 @@ def shuffle_phrase(file_path):
     random.shuffle(split_lorem)
     txt= split_lorem[0].upper()
     return txt
+
+# Fonctions pour le Symétrique
+# Dechiffre un fichier en AES en mode CBC avec un password
+def func_enc_aes(path, password, new_name):
+    command = f'openssl enc -aes-256-cbc -salt -in "{path}" -out "{new_name}" -pass pass:"{password}"'
+    result = run(command, shell=True, capture_output=True, text=True)
+    if result.returncode == 0:
+        print("Chiffrement réussi !")
+    else:
+        print("Erreur lors du chiffrement :", result.stderr)
+
+
+# Dechiffre un fichier en AES en mode CBC avec un password puis print
+from subprocess import run, PIPE
+
+def func_dec_aes(path, password):
+    output = run(
+        f'openssl enc -d -aes-256-cbc -in "{path}" -pass pass:"{password}"',
+        shell=True,
+        capture_output=True,
+        text=True
+    )
+
+    if output.returncode == 0:
+        print("Déchiffrement réussi !")
+        print("Contenu déchiffré :\n", output.stdout)
+    else:
+        # Conversion en Base64 du fichier en cas de mauvaise clé
+        base64_output = run(
+            f'openssl enc -base64 -in "{path}"',
+            shell=True,
+            capture_output=True,
+            text=True
+        )
+        if base64_output.returncode == 0:
+            print("Contenu déchiffré :\n",base64_output.stdout)
 
 # Fonctions pour le Hachage
 # MD5 Hash d'un fichier en entrée(path) et retourne l'empreinte
@@ -173,6 +209,141 @@ def pro_display_base64():
     # Fonction appelée lors du clic sur le bouton
     def on_button_clicked(b):
         with open('../Soluce/soluce_base64_1.py', 'r') as file:
+            code = file.read()
+            display(Code(code, language='python'))
+
+    # Liaison de la fonction avec l'événement "on_click" du bouton
+    button.on_click(on_button_clicked)
+
+    # Affichage du bouton
+    display(button)
+    
+## TB_Chiffrement de cesar
+### Exercice 1
+def pro_display_cesar_1():
+    # Création du bouton
+    button = widgets.Button(description="Afficher la solution",button_style='info')
+
+    # Fonction appelée lors du clic sur le bouton
+    def on_button_clicked(b):
+        with open('../Soluce/soluce_cesar_1.py', 'r') as file:
+            code = file.read()
+            display(Code(code, language='python'))
+
+    # Liaison de la fonction avec l'événement "on_click" du bouton
+    button.on_click(on_button_clicked)
+
+    # Affichage du bouton
+    display(button)
+
+### Exercice 2
+def pro_display_cesar_2():
+    # Création du bouton
+    button = widgets.Button(description="Afficher la solution",button_style='info')
+
+    # Fonction appelée lors du clic sur le bouton
+    def on_button_clicked(b):
+        with open('../Soluce/soluce_cesar_2.py', 'r') as file:
+            code = file.read()
+            display(Code(code, language='python'))
+
+    # Liaison de la fonction avec l'événement "on_click" du bouton
+    button.on_click(on_button_clicked)
+
+    # Affichage du bouton
+    display(button)
+    
+### Exercice 3
+def pro_display_cesar_3(nb):
+    # Création de l'Input pour les entiers avec des limites
+    int_input = widgets.IntText(
+        description='Clé'
+    )
+
+    # Création d'un bouton de validation
+    button_validate = widgets.Button(description="Valider",button_style='success')
+
+    # Fonction appelée lors du clic sur le bouton de validation
+    def validate_input(b):
+        if int_input.value == nb:
+            print("Bonne réponse!")
+        else:
+            print("Mauvaise réponse :(\nLa clé était le ",nb)
+        print("Nous pouvons voir qu'il suffirait simplement de faire tous les décalages de l'alphabet pour trouver le texte originel.")              
+
+    # Liaison de la fonction avec l'événement "on_click" du bouton de validation
+    button_validate.on_click(validate_input)
+
+    # Affichage de l'Input et du bouton
+    display(widgets.HBox([int_input, button_validate]))
+    
+## TB_Chiffrement de Vigenère
+### Exercice 1
+def pro_display_vigenere():
+    # Création du bouton
+    button = widgets.Button(description="Afficher la solution",button_style='info')
+
+    # Fonction appelée lors du clic sur le bouton
+    def on_button_clicked(b):
+        with open('../Soluce/soluce_vigenere_1.py', 'r') as file:
+            code = file.read()
+            display(Code(code, language='python'))
+
+    # Liaison de la fonction avec l'événement "on_click" du bouton
+    button.on_click(on_button_clicked)
+
+    # Affichage du bouton
+    display(button)
+
+    
+## TB_Chiffrement symétrique
+### Exercice 1    
+def pro_display_sym():
+    # Liste des objets
+    objets = ['Bleu', 'Jaune', 'Rouge','Vert']
+
+    label=widgets.Label(value="Séléctionnez la couleur préférée de chacun :")
+
+    # Création de la liste déroulante
+    dropdown1 = widgets.Dropdown(
+        options=objets,
+        description='Alice',
+        value=None
+    )
+    dropdown2 = widgets.Dropdown(
+        options=objets,
+        description='Bob',
+        value=None
+    )
+    dropdown3 = widgets.Dropdown(
+        options=objets,
+        description='Marc',
+        value=None
+    )
+
+    # Création d'un bouton de validation
+    button_validate = widgets.Button(description="Valider")
+
+    # Fonction appelée lors du clic sur le bouton de validation
+    def validate_selection(b):
+        if dropdown1.value == 'Jaune'  and dropdown2.value == 'Vert' and dropdown3.value == 'Bleu':
+            print("Bonne réponse!")
+        else:
+            print("Mauvaise réponse :(")
+
+    # Liaison de la fonction avec l'événement "on_click" du bouton de validation
+    button_validate.on_click(validate_selection)
+
+    # Affichage de la liste déroulante et du bouton
+    display(widgets.VBox([label, dropdown1, dropdown2, dropdown3, button_validate]))
+
+def pro_display_sym_soluce():
+    # Création du bouton
+    button = widgets.Button(description="Afficher la solution",button_style='info')
+
+    # Fonction appelée lors du clic sur le bouton
+    def on_button_clicked(b):
+        with open('../Soluce/soluce_sym_1.py', 'r') as file:
             code = file.read()
             display(Code(code, language='python'))
 
