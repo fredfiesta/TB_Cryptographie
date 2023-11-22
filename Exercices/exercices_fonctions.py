@@ -1,17 +1,36 @@
 import base64
 import random
+import time
 from subprocess import check_output, run
 import ipywidgets as widgets
 from IPython.display import display, HTML, Code
 
 # Fonctions pour tous
 # Tire une phrase d'un fichier txt formaté
-def shuffle_phrase(file_path):
+def shuffle_phrase(file_path='../phrases.txt'):
     lorem_path = open(file_path, "r", encoding="utf-8")
     split_lorem = lorem_path.read().splitlines()
     random.shuffle(split_lorem)
     txt= split_lorem[0].upper()
     return txt
+
+# Fonctinos pour l'Asymétrique
+# Génère une paire de clés en RSA
+def func_gen_rsa(path_out='Fichiers/Asymetrique/Exemple_key.pem'):
+    command = f'openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -outform pem -out "{path_out}"'
+    try:
+        run(command, shell=True)
+    except CalledProcessError as e:
+        print(f"Error generating keypair: {e.output}")
+
+# De la clé RSA générée par la fonction d'avant, génère la clé publique
+def func_pub_rsa(path_in='Fichiers/Asymetrique/Exemple_key.pem', path_out='Fichiers/Asymetrique/Exemple_key.pub'):
+    command = f'openssl pkey -in "{path_in}" -out {path_out} -outform pem -pubout'
+    try:
+        run(command, shell=True)
+    except CalledProcessError as e:
+        print(f"Error generating keypair: {e.output}")
+
 
 # Fonctions pour le Symétrique
 # Dechiffre un fichier en AES en mode CBC avec un password
@@ -92,7 +111,7 @@ def func_string_to_binary(texte):
 # Fonctions chiffrement de César
 
 # shuffle_phrase pour l'exercice 2 de César
-def shuffle_phrase_ex2(file_path):
+def shuffle_phrase_ex2(file_path='../phrases.txt'):
     lorem_path = open(file_path, "r", encoding="utf-8")
     split_lorem = lorem_path.read().splitlines()
     random.shuffle(split_lorem)
@@ -352,3 +371,53 @@ def pro_display_sym_soluce():
 
     # Affichage du bouton
     display(button)
+    
+
+## TB_Chiffrement Asymétrique
+### Démo
+#### Progressbar pour la démo
+def pro_display_asym_progressbar():
+    # Créer la barre de progression
+    progress_bar = widgets.IntProgress(
+        value=0,
+        min=0,
+        max=3,
+        description='Génération des clés : ',
+        bar_style='info', # 'success', 'info', 'warning', 'danger' or ''
+        style={'bar_color': 'blue'},
+        orientation='horizontal'
+    )
+    display(progress_bar)
+    # Génération des clés
+    func_gen_rsa()
+    func_pub_rsa()
+    # Démarrer le compteur
+    for i in range(3):
+        # Attendre une seconde
+        time.sleep(1)
+        # Mettre à jour la valeur de la barre de progression
+        progress_bar.value += 1
+        
+    pro_display_keys_rsa()
+    
+#### Affiche les clés générée, dans la démo
+def pro_display_keys_rsa():
+    label1 = widgets.Label(value="Voici à quoi ressemble une clé privée en RSA :")
+    label2 = widgets.Label(value="Voici à quoi ressemble une clé publique en RSA :")
+    with open('Fichiers/Asymetrique/Exemple_key.pem', 'r') as file:
+            code = file.read()
+            display(label1, Code(code, language='python'))
+    with open('Fichiers/Asymetrique/Exemple_key.pub', 'r') as file:
+            code = file.read()
+            display(label2, Code(code, language='python'))    
+#### Bouton servant à lancer la démo
+def pro_display_asym_1():
+    # Créer le bouton
+    button = widgets.Button(description='Générer les clés', button_style='warning')
+    
+    def on_button_clicked(b):
+        pro_display_asym_progressbar()
+        
+    button.on_click(on_button_clicked)
+    # Afficher la barre de progression et le bouton
+    display(button) 

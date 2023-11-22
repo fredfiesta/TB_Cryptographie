@@ -1,6 +1,6 @@
 # Solution - Exercice 1
 ## Choisir une phrase au hasard (ou non)
-texte = ef.shuffle_phrase(file_path)
+texte = ef.shuffle_phrase()
 print(texte)
 
 ## Choisir une Clé au hasard (ou non)
