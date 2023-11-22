@@ -1,7 +1,7 @@
 import base64
 import random
 import time
-from subprocess import check_output, run
+from subprocess import check_output, run, CalledProcessError
 import ipywidgets as widgets
 from IPython.display import display, HTML, Code
 
@@ -15,9 +15,52 @@ def shuffle_phrase(file_path='../phrases.txt'):
     return txt
 
 # Fonctinos pour l'Asymétrique
+
+# Fonction pour déchiffrer un fichier avec un clé privée
+def func_dec_rsa(path_in, key):
+    command = ['openssl', 'pkeyutl', '-decrypt', '-inkey', key, '-in', path_in]
+    try:
+        output = check_output(command)
+        print("Déchiffrement réussi!")
+        print("Le message est :")
+        print(output.decode())
+    except CalledProcessError as e:
+        print("Le déchiffrement a échoué :(")
+
+# Fonction pour recevoir le msg random d'Alice
+def func_alice_msg_rsa():
+    with open('Fichiers/Asymetrique/Exercice1_message.txt', 'w') as f:
+        # Écrire le texte dans le fichier.
+        f.write(shuffle_phrase())
+        
+    msg='Fichiers/Asymetrique/Exercice1_message.txt'
+    pub='Fichiers/Asymetrique/Exercice1_key.pub'
+    out='Fichiers/Asymetrique/Exercice1_alice_msg.txt'
+    func_enc_rsa(msg,pub,out)
+    
+    base64_output = run(
+            f'openssl enc -base64 -in "{out}"',
+            shell=True,
+            capture_output=True,
+            text=True
+        )
+    if base64_output.returncode == 0:
+        print("Votre message est au chemin suivant : ",out)
+        print("Contenu chiffré :")
+        print(base64_output.stdout)
+    
+    
+# Chiffre en RSA avec une clé publique
+def func_enc_rsa(path_in,path_key,path_out):
+    command = f'openssl pkeyutl -encrypt -pubin -inkey "{path_key}" -in "{path_in}" -out "{path_out}"'
+    try:
+        run(command, shell=True, capture_output=True, text=True)
+    except CalledProcessError as e:
+        print(f"Error: {e.output}")
+
 # Génère une paire de clés en RSA
 def func_gen_rsa(path_out='Fichiers/Asymetrique/Exemple_key.pem'):
-    command = f'openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -outform pem -out "{path_out}"'
+    command = f'openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:1028 -outform pem -out "{path_out}"'
     try:
         run(command, shell=True)
     except CalledProcessError as e:
@@ -25,11 +68,11 @@ def func_gen_rsa(path_out='Fichiers/Asymetrique/Exemple_key.pem'):
 
 # De la clé RSA générée par la fonction d'avant, génère la clé publique
 def func_pub_rsa(path_in='Fichiers/Asymetrique/Exemple_key.pem', path_out='Fichiers/Asymetrique/Exemple_key.pub'):
-    command = f'openssl pkey -in "{path_in}" -out {path_out} -outform pem -pubout'
+    command = f'openssl pkey -in "{path_in}" -out "{path_out}" -outform pem -pubout'
     try:
         run(command, shell=True)
     except CalledProcessError as e:
-        print(f"Error generating keypair: {e.output}")
+        print(f"Error: {e.output}")
 
 
 # Fonctions pour le Symétrique
@@ -410,6 +453,7 @@ def pro_display_keys_rsa():
     with open('Fichiers/Asymetrique/Exemple_key.pub', 'r') as file:
             code = file.read()
             display(label2, Code(code, language='python'))    
+            
 #### Bouton servant à lancer la démo
 def pro_display_asym_1():
     # Créer le bouton
@@ -420,4 +464,21 @@ def pro_display_asym_1():
         
     button.on_click(on_button_clicked)
     # Afficher la barre de progression et le bouton
-    display(button) 
+    display(button)
+
+#### Bouton soluce asym
+def pro_display_asym_soluce():
+    # Création du bouton
+    button = widgets.Button(description="Afficher la solution",button_style='info')
+
+    # Fonction appelée lors du clic sur le bouton
+    def on_button_clicked(b):
+        with open('../Soluce/soluce_asym_1.py', 'r') as file:
+            code = file.read()
+            display(Code(code, language='python'))
+
+    # Liaison de la fonction avec l'événement "on_click" du bouton
+    button.on_click(on_button_clicked)
+
+    # Affichage du bouton
+    display(button)    
