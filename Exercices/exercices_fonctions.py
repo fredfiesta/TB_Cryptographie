@@ -1,9 +1,11 @@
 import base64
 import random
 import time
-from subprocess import check_output, run, CalledProcessError
 import ipywidgets as widgets
+import os
+from subprocess import check_output, run, CalledProcessError, PIPE
 from IPython.display import display, HTML, Code
+
 
 # Fonctions pour tous
 # Tire une phrase d'un fichier txt formaté
@@ -15,6 +17,52 @@ def shuffle_phrase(file_path='../phrases.txt'):
     return txt
 
 # Fonctinos pour l'Asymétrique
+
+# Execute la commande pour extraire une clé publique
+def func_cmd_extract_rsa(commande):
+    pem_path = 'Fichiers/Asymetrique/Exercice1.pem'
+    pub_path = 'Fichiers/Asymetrique/Exercice1.pub'
+
+    if os.path.exists(pub_path):
+        os.remove(pub_path)
+
+    try:
+        run(commande, shell=True, check=True)
+    except CalledProcessError as e:
+        print(f"Il y a eu une erreur dans l'extraction, la commande est incorrecte : {e.output}")
+        return
+
+    if os.path.exists(pub_path):
+        pem_size = os.path.getsize(pem_path)
+        pub_size = os.path.getsize(pub_path)
+
+        if pub_size < pem_size:
+            with open(pub_path, 'r') as key_file:
+                print("Clé publique :\n", key_file.read())
+        else:
+            print("La commande est incomplète. Ajoutez \"-pubout\".")
+            print('Voici ce que vous avez extrait:')
+            with open(pub_path, 'r') as key_file:
+                print(key_file.read())
+    else:
+        print("Le fichier est au mauvais chemin ou la commande est incorrecte")
+
+
+# Execute la commande pour gen un clé rsa
+def func_cmd_generate_rsa(commande):
+    command = f'{commande}'
+    file_path = 'Fichiers/Asymetrique/Exercice1.pem'
+    if os.path.exists(file_path):
+        os.remove(file_path)
+
+    run(command, shell=True)
+        
+    if os.path.exists(file_path):
+        with open(file_path, 'r') as key_file:
+            print("Clé générée :\n", key_file.read())
+    else:
+        print("Le fichier est au mauvais chemin ou la commande est incorrecte")
+
 
 # Fonction pour déchiffrer un fichier avec un clé privée
 def func_dec_rsa(path_in, key):
@@ -29,13 +77,13 @@ def func_dec_rsa(path_in, key):
 
 # Fonction pour recevoir le msg random d'Alice
 def func_alice_msg_rsa():
-    with open('Fichiers/Asymetrique/Exercice1_message.txt', 'w') as f:
+    with open('Fichiers/Asymetrique/Exercice2_message.txt', 'w') as f:
         # Écrire le texte dans le fichier.
         f.write(shuffle_phrase())
         
-    msg='Fichiers/Asymetrique/Exercice1_message.txt'
-    pub='Fichiers/Asymetrique/Exercice1_key.pub'
-    out='Fichiers/Asymetrique/Exercice1_alice_msg.txt'
+    msg='Fichiers/Asymetrique/Exercice2_message.txt'
+    pub='Fichiers/Asymetrique/Exercice2_key.pub'
+    out='Fichiers/Asymetrique/Exercice2_alice_msg.txt'
     func_enc_rsa(msg,pub,out)
     
     base64_output = run(
@@ -76,7 +124,25 @@ def func_pub_rsa(path_in='Fichiers/Asymetrique/Exemple_key.pem', path_out='Fichi
 
 
 # Fonctions pour le Symétrique
-# Dechiffre un fichier en AES en mode CBC avec un password
+
+# execute la cmd pour déchiffrer un fichier
+def func_cmd_aes(commande):
+    output = run(
+        f'{commande}',
+        shell=True,
+        capture_output=True,
+        text=True
+    )
+
+    if output.returncode == 0:
+        print("Déchiffrement réussi !")
+        print("Contenu déchiffré :")
+        print(output.stdout)
+    else:
+        print("Il y a une erreur dans la commande !!")
+        print(output.stderr)
+
+# Chiffre un fichier en AES en mode CBC avec un password
 def func_enc_aes(path, password, new_name):
     command = f'openssl enc -aes-256-cbc -salt -in "{path}" -out "{new_name}" -pass pass:"{password}"'
     result = run(command, shell=True, capture_output=True, text=True)
@@ -87,8 +153,6 @@ def func_enc_aes(path, password, new_name):
 
 
 # Dechiffre un fichier en AES en mode CBC avec un password puis print
-from subprocess import run, PIPE
-
 def func_dec_aes(path, password):
     output = run(
         f'openssl enc -d -aes-256-cbc -in "{path}" -pass pass:"{password}"',
@@ -112,6 +176,13 @@ def func_dec_aes(path, password):
             print("Contenu déchiffré :\n",base64_output.stdout)
 
 # Fonctions pour le Hachage
+# Execute la commande / md5 
+def func_cmd_md5(command):
+    empreinte_md5 = check_output(
+        f'{command}',
+        shell=True
+    ).strip().decode("utf-8")
+    return empreinte_md5
 # MD5 Hash d'un fichier en entrée(path) et retourne l'empreinte
 def func_hash_md5(path):
     empreinte_md5 = check_output(
@@ -137,6 +208,7 @@ def func_enc_cbc(texte):
     ).strip().decode("utf-8")
 
     return resultat_chiffre
+
 # Fonctions Base64
 # Encode le mot en base64
 def func_enc_base64(texte):
@@ -233,7 +305,7 @@ def func_dec_vig(cipher_text, key):
 # Procédures d'affichage boutons pour exercices
 ## TB_Hachage
 ### Exercice 1 : Questionnaire
-def pro_display_md5():
+def pro_display_md5_1():
     # Création des ToggleButtons
     toggle_buttons = widgets.ToggleButtons(
         options=['Alice.txt', 'Bob.txt', 'Marc.txt'],
@@ -262,6 +334,62 @@ def pro_display_md5():
     # Affichage des ToggleButtons
     display(toggle_buttons)
 
+### Exercice 2 : Entrée manuelle
+def pro_display_md5_2():
+    # Champ de saisie de texte
+    text_input = widgets.Text(description='Empreinte', layout=widgets.Layout(width='400px'))
+
+    # Bouton de validation
+    button_validate = widgets.Button(description="Valider", button_style='info')
+
+    # Fonction appelée lors du clic sur le bouton de validation
+    def validate_input(b):
+        REP = 'a59eb41971d0aa65aec5c00d70306d4d'
+        if text_input.value == REP:
+            print("Bonne réponse !")
+            print("L'empreinte du fichier est ",text_input.value)
+        elif text_input.value != '':    
+            print("Mauvaise réponse :(")
+
+    # Liaison de la fonction avec l'événement "on_click" du bouton de validation
+    button_validate.on_click(validate_input)
+
+    # Affichage du champ de saisie de texte et du bouton
+    display(widgets.HBox([text_input, button_validate]))
+
+def pro_display_md5_soluce_1():
+    # Création du bouton
+    button = widgets.Button(description="Afficher la solution",button_style='info')
+
+    # Fonction appelée lors du clic sur le bouton
+    def on_button_clicked(b):
+        with open('../Soluce/soluce_hash_1.py', 'r') as file:
+            code = file.read()
+            display(Code(code, language='python'))
+
+    # Liaison de la fonction avec l'événement "on_click" du bouton
+    button.on_click(on_button_clicked)
+
+    # Affichage du bouton
+    display(button)
+    
+def pro_display_md5_soluce_2():
+    # Création du bouton
+    button = widgets.Button(description="Afficher la solution",button_style='info')
+
+    # Fonction appelée lors du clic sur le bouton
+    def on_button_clicked(b):
+        with open('../Soluce/soluce_hash_2.py', 'r') as file:
+            code = file.read()
+            display(Code(code, language='python'))
+
+    # Liaison de la fonction avec l'événement "on_click" du bouton
+    button.on_click(on_button_clicked)
+
+    # Affichage du bouton
+    display(button)
+    
+    
 ## TB_base64
 ### Exercice 1 : Bouton solution
 def pro_display_base64():
@@ -360,7 +488,7 @@ def pro_display_vigenere():
     
 ## TB_Chiffrement symétrique
 ### Exercice 1    
-def pro_display_sym():
+def pro_display_sym_1():
     # Liste des objets
     objets = ['Bleu', 'Jaune', 'Rouge','Vert']
 
@@ -384,7 +512,7 @@ def pro_display_sym():
     )
 
     # Création d'un bouton de validation
-    button_validate = widgets.Button(description="Valider")
+    button_validate = widgets.Button(description="Valider", button_style='info')
 
     # Fonction appelée lors du clic sur le bouton de validation
     def validate_selection(b):
@@ -399,7 +527,7 @@ def pro_display_sym():
     # Affichage de la liste déroulante et du bouton
     display(widgets.VBox([label, dropdown1, dropdown2, dropdown3, button_validate]))
 
-def pro_display_sym_soluce():
+def pro_display_sym_soluce_1():
     # Création du bouton
     button = widgets.Button(description="Afficher la solution",button_style='info')
 
@@ -414,6 +542,44 @@ def pro_display_sym_soluce():
 
     # Affichage du bouton
     display(button)
+### Exercice 2 : Entrée manuelle
+def pro_display_sym_2():
+    # Champ de saisie de texte
+    text_input = widgets.Text(layout=widgets.Layout(width='400px'))
+
+    # Bouton de validation
+    button_validate = widgets.Button(description="Valider", button_style='info')
+
+    # Fonction appelée lors du clic sur le bouton de validation
+    def validate_input(b):
+        REP = 'MHW2?'
+        if text_input.value == REP:
+            print("Bonne réponse !")
+        elif text_input.value != '':    
+            print("Mauvaise réponse :(")
+
+    # Liaison de la fonction avec l'événement "on_click" du bouton de validation
+    button_validate.on_click(validate_input)
+
+    # Affichage du champ de saisie de texte et du bouton
+    display(widgets.HBox([text_input, button_validate]))
+    
+def pro_display_sym_soluce_2():
+    # Création du bouton
+    button = widgets.Button(description="Afficher la solution",button_style='info')
+
+    # Fonction appelée lors du clic sur le bouton
+    def on_button_clicked(b):
+        with open('../Soluce/soluce_sym_2.py', 'r') as file:
+            code = file.read()
+            display(Code(code, language='python'))
+
+    # Liaison de la fonction avec l'événement "on_click" du bouton
+    button.on_click(on_button_clicked)
+
+    # Affichage du bouton
+    display(button)
+    
     
 
 ## TB_Chiffrement Asymétrique
@@ -466,14 +632,30 @@ def pro_display_asym_1():
     # Afficher la barre de progression et le bouton
     display(button)
 
-#### Bouton soluce asym
-def pro_display_asym_soluce():
+#### Bouton soluce asym 1
+def pro_display_asym_soluce_1():
     # Création du bouton
     button = widgets.Button(description="Afficher la solution",button_style='info')
 
     # Fonction appelée lors du clic sur le bouton
     def on_button_clicked(b):
         with open('../Soluce/soluce_asym_1.py', 'r') as file:
+            code = file.read()
+            display(Code(code, language='python'))
+
+    # Liaison de la fonction avec l'événement "on_click" du bouton
+    button.on_click(on_button_clicked)
+
+    # Affichage du bouton
+    display(button)    
+#### Bouton soluce asym 2
+def pro_display_asym_soluce_2():
+    # Création du bouton
+    button = widgets.Button(description="Afficher la solution",button_style='info')
+
+    # Fonction appelée lors du clic sur le bouton
+    def on_button_clicked(b):
+        with open('../Soluce/soluce_asym_2.py', 'r') as file:
             code = file.read()
             display(Code(code, language='python'))
 

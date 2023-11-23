@@ -160,3 +160,5 @@ cython_debug/
 #.idea/
 Exercices/Fichiers/Asymetrique/Exemple_key.pem
 Exercices/Fichiers/Asymetrique/Exemple_key.pub
+Exercices/Fichiers/Asymetrique/Exercice1.pem
+Exercices/Fichiers/Asymetrique/Exercice1.pub

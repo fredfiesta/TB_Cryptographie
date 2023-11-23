@@ -1,11 +1,9 @@
 # Solution - Exercice 1
-## Variables
-publique='Fichiers/Asymetrique/Exercice1_key.pub'
-privee='Fichiers/Asymetrique/Exercice1_key.pem'
+# Votre code
+# Generate private
+commande1='openssl genpkey -algorithm RSA -out Fichiers/Asymetrique/Exercice1.pem'
+ef.func_cmd_generate_rsa(commande1)
 
-# Reception du message chiffré avec la clé publique
-ef.func_alice_msg_rsa()
-
-# Déchiffrer le message avec la clé privée
-message='Fichiers/Asymetrique/Exercice1_alice_msg.txt'
-ef.func_dec_rsa(message,privee)
+# Generate public
+commande2='openssl pkey -in Fichiers/Asymetrique/Exercice1.pem -out Fichiers/Asymetrique/Exercice1.pub -pubout'
+ef.func_cmd_extract_rsa(commande2)
