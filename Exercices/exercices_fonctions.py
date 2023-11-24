@@ -46,8 +46,7 @@ def func_cmd_extract_rsa(commande):
                 print(key_file.read())
     else:
         print("Le fichier est au mauvais chemin ou la commande est incorrecte")
-
-
+    
 # Execute la commande pour gen un clé rsa
 def func_cmd_generate_rsa(commande):
     command = f'{commande}'
@@ -62,18 +61,51 @@ def func_cmd_generate_rsa(commande):
             print("Clé générée :\n", key_file.read())
     else:
         print("Le fichier est au mauvais chemin ou la commande est incorrecte")
+        
+# Chiffre en RSA avec une clé publique
+def func_cmd_enc_rsa(commande):
+    command = f'{commande}'
+    file_path = 'Fichiers/Asymetrique/Exercice3_document.txt.enc'
+    key= 'Fichiers/Asymetrique/Exercice3_key.pem'
+    
+    if os.path.exists(file_path):
+        os.remove(file_path)
+        
+    try:
+        run(command, shell=True, text=True)
+        if os.path.exists(file_path):
+            if func_dec_rsa(file_path, key, False) == 'Success':
+                print("Vous avez correctement chiffré le document.")
+        else:
+            print("Il y a une erreur :(")
+    except CalledProcessError as e:
+        print(f"Error: {e.output}")
 
 
-# Fonction pour déchiffrer un fichier avec un clé privée
-def func_dec_rsa(path_in, key):
-    command = ['openssl', 'pkeyutl', '-decrypt', '-inkey', key, '-in', path_in]
+# Exec la commande pour déchiffrer un fichier avec un clé privée
+def func_cmd_dec_rsa(commande):
+    command = commande.split()
     try:
         output = check_output(command)
         print("Déchiffrement réussi!")
-        print("Le message est :")
-        print(output.decode())
+        print("Le message est :",output.decode())
     except CalledProcessError as e:
         print("Le déchiffrement a échoué :(")
+
+# Fonction pour déchiffrer un fichier avec un clé privée
+def func_dec_rsa(path_in, key,p=True):
+    command = ['openssl', 'pkeyutl', '-decrypt', '-inkey', key, '-in', path_in]
+    try:
+        output = check_output(command)
+        if p:
+            print("Déchiffrement réussi!")
+            print("Le message est :")
+            print(output.decode())
+        elif not p:
+            return output.decode()
+    except CalledProcessError as e:
+        print("Le déchiffrement a échoué :(")
+        print(f"Error: {e.output}")
 
 # Fonction pour recevoir le msg random d'Alice
 def func_alice_msg_rsa():
@@ -656,6 +688,23 @@ def pro_display_asym_soluce_2():
     # Fonction appelée lors du clic sur le bouton
     def on_button_clicked(b):
         with open('../Soluce/soluce_asym_2.py', 'r') as file:
+            code = file.read()
+            display(Code(code, language='python'))
+
+    # Liaison de la fonction avec l'événement "on_click" du bouton
+    button.on_click(on_button_clicked)
+
+    # Affichage du bouton
+    display(button)
+    
+#### Bouton soluce asym 3
+def pro_display_asym_soluce_3():
+    # Création du bouton
+    button = widgets.Button(description="Afficher la solution",button_style='info')
+
+    # Fonction appelée lors du clic sur le bouton
+    def on_button_clicked(b):
+        with open('../Soluce/soluce_asym_3.py', 'r') as file:
             code = file.read()
             display(Code(code, language='python'))
 
