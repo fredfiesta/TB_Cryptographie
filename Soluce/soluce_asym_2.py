@@ -3,7 +3,7 @@
 publique='Fichiers/Asymetrique/Exercice2_key.pub'
 privee='Fichiers/Asymetrique/Exercice2_key.pem'
 
-# Reception du message chiffré avec la clé publique
+# Réception du message chiffré avec la clé publique
 ef.func_alice_msg_rsa()
 
 # Déchiffrer le message avec la clé privée
