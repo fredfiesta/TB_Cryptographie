@@ -1,5 +1,5 @@
-# TB_Crypto
- TB Introduction à la cryptographie
+# Introduction pratique à la cryptographie : Techniques de chiffrement, outils illustrés sur Jupyter Notebook
+ Ci-dessous, vous trouverez les guides d'installation des technologies et de lancement des exercices.
 
 ## Installation de SageNotebook
 Afin de pouvoir effectuer les exercices, ils nous faut tout d’abord installer les outils nécessaires.
